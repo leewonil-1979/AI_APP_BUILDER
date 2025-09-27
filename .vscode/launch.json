@@ -1,0 +1,70 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🐛 Debug Builder Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": ["${input:builderScript}"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}\\.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    },
+    {
+      "name": "🔍 Debug LLM Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": [
+        "${workspaceFolder}\\builder\\scripts\\idea-to-spec-llm.ts",
+        "${workspaceFolder}\\apps\\my_app1\\specs\\idea.txt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}\\.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "🏗️ Debug Codegen Agent",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": ["${workspaceFolder}\\builder\\agents\\b_codegen.ts", "--appPath", "apps/my_app1"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "✅ Debug Verify Agent",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": [
+        "${workspaceFolder}\\builder\\agents\\c_verify_optimize.ts",
+        "--appPath",
+        "apps/my_app1"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "builderScript",
+      "type": "pickString",
+      "description": "디버그할 스크립트 선택",
+      "options": [
+        "builder/scripts/idea-to-spec.ts",
+        "builder/scripts/idea-to-spec-llm.ts",
+        "builder/scripts/strip-jsonc.ts",
+        "builder/agents/a_orchestrator.ts",
+        "builder/agents/b_codegen.ts",
+        "builder/agents/c_verify_optimize.ts"
+      ]
+    }
+  ]
+}

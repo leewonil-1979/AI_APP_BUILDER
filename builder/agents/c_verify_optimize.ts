@@ -78,18 +78,32 @@ async function main() {
       throw new Error("npm install 실패");
     }
 
-    // Step 2: TypeScript 컴파일 체크
+    // Step 2: TypeScript 컴파일 체크 (strict)
     console.log("🔧 TypeScript 컴파일 체크...");
-    status = run("npx", ["tsc", "--noEmit"], OUT_DIR);
+    status = run("npx", ["tsc", "--noEmit", "--strict"], OUT_DIR);
     results.steps.push({
       name: "typescript check",
-      status: status === 0 ? "success" : "failed",
+      status: status === 0 ? "success" : "warning",
       exitCode: status,
     });
 
     if (status !== 0) {
       console.log("⚠️ TypeScript 컴파일 경고가 있지만 계속 진행합니다.");
       results.errors.push("TypeScript compilation warnings");
+    }
+
+    // Step 2.5: Lint 검사 (있는 경우)
+    console.log("🧹 ESLint 검사...");
+    status = run("npm", ["run", "lint", "--", "--max-warnings", "0"], OUT_DIR);
+    results.steps.push({
+      name: "lint check",
+      status: status === 0 ? "success" : "warning",
+      exitCode: status,
+    });
+
+    if (status !== 0) {
+      console.log("⚠️ Lint 경고가 있지만 계속 진행합니다.");
+      results.errors.push("ESLint warnings found");
     }
 
     // Step 3: Build

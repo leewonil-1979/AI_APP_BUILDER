@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Check: print OPENAI key (first 10) [cmd]",
+      "label": "🔑 Check OPENAI Key",
       "type": "shell",
       "command": "npx",
       "args": [
@@ -18,58 +18,147 @@
         "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
       },
       "problemMatcher": [],
-      "detail": ".env 로드 확인(앞 10자 출력)"
+      "detail": ".env 로드 확인(앞 10자 출력)",
+      "group": "test"
     },
     {
-      "label": "LLM: app:init (dotenv, pick app) [cmd]",
-      "type": "shell",
-      "command": "npx",
-      "args": [
-        "dotenv",
-        "-e",
-        "${workspaceFolder}\\.env",
-        "--",
-        "npm",
-        "--prefix",
-        "${input:appDir}",
-        "run",
-        "app:init:llm"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}",
-        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
-      },
-      "problemMatcher": [],
-      "detail": "dotenv로 OPENAI_API_KEY 로드 → 선택 앱에서 app:init:llm 실행"
-    },
-    {
-      "label": "Rule-based: app:init (pick app) [cmd]",
+      "label": "🤖 LLM: Full Pipeline",
       "type": "shell",
       "command": "npm",
-      "args": [
-        "--prefix",
-        "${input:appDir}",
-        "run",
-        "app:init"
-      ],
+      "args": ["-w", "${input:appName}", "run", "app:init:llm"],
       "options": {
-        "cwd": "${workspaceFolder}",
-        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
-      "detail": "규칙 기반 idea-to-spec → strip → check → A/B/C"
+      "detail": "LLM 기반 전체 파이프라인 실행 (idea → spec → code → verify)",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "📝 Rule-based: Full Pipeline",
+      "type": "shell",
+      "command": "npm",
+      "args": ["-w", "${input:appName}", "run", "app:init"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "규칙 기반 전체 파이프라인 실행",
+      "group": "build"
+    },
+    {
+      "label": "🏗️ Codegen Only",
+      "type": "shell",
+      "command": "npm",
+      "args": ["-w", "${input:appName}", "run", "b:codegen"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "코드 생성만 실행",
+      "group": "build"
+    },
+    {
+      "label": "✅ Verify Only",
+      "type": "shell",
+      "command": "npm",
+      "args": ["-w", "${input:appName}", "run", "c:verify"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "검증 및 빌드만 실행",
+      "group": "test"
+    },
+    {
+      "label": "🚀 Start Dev Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "options": {
+        "cwd": "${workspaceFolder}\\${input:appName}\\generated\\web"
+      },
+      "problemMatcher": [],
+      "detail": "생성된 앱의 개발 서버 시작",
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "📦 Build Production",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}\\${input:appName}\\generated\\web"
+      },
+      "problemMatcher": [],
+      "detail": "프로덕션 빌드 실행",
+      "group": "build"
+    },
+    {
+      "label": "🌐 Preview Build",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "preview"],
+      "options": {
+        "cwd": "${workspaceFolder}\\${input:appName}\\generated\\web"
+      },
+      "problemMatcher": [],
+      "detail": "빌드 결과물 미리보기 서버",
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "📋 Generate Spec from Idea",
+      "type": "shell",
+      "command": "npm",
+      "args": ["-w", "${input:appName}", "run", "spec:gen:llm"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "LLM으로 아이디어에서 스펙 생성",
+      "group": "build"
+    },
+    {
+      "label": "🔍 Validate Spec",
+      "type": "shell",
+      "command": "npm",
+      "args": ["-w", "${input:appName}", "run", "spec:check"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "스펙 파일 JSON 스키마 검증",
+      "group": "test"
+    },
+    {
+      "label": "🆕 Create New App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "new", "${input:newAppName}"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "새로운 앱 프로젝트 생성",
+      "group": "build"
     }
   ],
   "inputs": [
     {
-      "id": "appDir",
+      "id": "appName",
       "type": "pickString",
-      "description": "앱 디렉토리 선택",
-      "options": [
-        ".\\apps\\my_app1",
-        ".\\apps\\my_app_sandbox"
-      ],
-      "default": ".\\apps\\my_app1"
+      "description": "작업할 앱 선택",
+      "options": ["apps/my_app1", "apps/my_app_sandbox"],
+      "default": "apps/my_app1"
+    },
+    {
+      "id": "newAppName",
+      "type": "promptString",
+      "description": "새 앱 이름을 입력하세요 (예: my_app2)"
     }
   ]
 }

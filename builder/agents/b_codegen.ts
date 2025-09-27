@@ -31,6 +31,152 @@ function writeFile(p: string, s: string) {
   fs.writeFileSync(p, s, "utf8");
 }
 
+// 타입 정의 생성
+function renderTypes(spec: AppSpec) {
+  const features = spec.scope?.must_features || [];
+
+  return `// 자동 생성된 타입 정의
+export type PageId = ${features.map((f) => `'${f}'`).join(" | ")};
+
+export type AppState = {
+  currentPage: PageId;
+  counters: Record<string, number>;
+  lastUpdated: string;
+};
+
+export type Feature = {
+  id: PageId;
+  title: string;
+  description: string;
+  hasCounter?: boolean;
+};
+
+export const FEATURES: Feature[] = [
+  ${features
+    .map(
+      (feature) => `{
+    id: '${feature}',
+    title: '${feature}',
+    description: '${feature} 기능을 구현할 수 있습니다.',
+    hasCounter: ${feature.includes("기록") || feature.includes("카운터") ? "true" : "false"}
+  }`,
+    )
+    .join(",\n  ")}
+];
+
+export type AppConfig = {
+  title: string;
+  version: string;
+  description: string;
+};
+`;
+}
+
+// 상태 관리 훅 생성
+function renderHooks(spec: AppSpec) {
+  const features = spec.scope?.must_features || [];
+
+  return `import { useState, useCallback } from 'react';
+import { AppState, PageId, FEATURES } from './types';
+
+const initialState: AppState = {
+  currentPage: '${features[0] || "home"}',
+  counters: {${features.map((f) => `'${f}': 0`).join(", ")}},
+  lastUpdated: new Date().toISOString()
+};
+
+export function useAppState() {
+  const [state, setState] = useState<AppState>(initialState);
+
+  const setCurrentPage = useCallback((pageId: PageId) => {
+    setState(prev => ({
+      ...prev,
+      currentPage: pageId,
+      lastUpdated: new Date().toISOString()
+    }));
+  }, []);
+
+  const incrementCounter = useCallback((feature: string) => {
+    setState(prev => ({
+      ...prev,
+      counters: {
+        ...prev.counters,
+        [feature]: (prev.counters[feature] || 0) + 1
+      },
+      lastUpdated: new Date().toISOString()
+    }));
+  }, []);
+
+  const resetCounter = useCallback((feature: string) => {
+    setState(prev => ({
+      ...prev,
+      counters: {
+        ...prev.counters,
+        [feature]: 0
+      },
+      lastUpdated: new Date().toISOString()
+    }));
+  }, []);
+
+  const getFeature = useCallback((id: PageId) => {
+    return FEATURES.find(f => f.id === id);
+  }, []);
+
+  return {
+    state,
+    actions: {
+      setCurrentPage,
+      incrementCounter,
+      resetCounter,
+      getFeature
+    }
+  };
+}
+`;
+}
+
+// 페이지 컴포넌트 생성
+function renderPageComponent(feature: string) {
+  const hasCounter = feature.includes("기록") || feature.includes("카운터");
+
+  return `import React from 'react';
+
+interface ${feature}PageProps {
+  counter: number;
+  onIncrement: () => void;
+  onReset: () => void;
+}
+
+export function ${feature}Page({ counter, onIncrement, onReset }: ${feature}PageProps) {
+  return (
+    <div className="page">
+      <h2>📱 ${feature} 페이지</h2>
+      <p>${feature} 기능을 구현할 수 있습니다.</p>
+      
+      ${
+        hasCounter
+          ? `
+      <div className="counter-section">
+        <p>기록 카운터: {counter}</p>
+        <button onClick={onIncrement} className="increment-btn">
+          기록 추가 (+1)
+        </button>
+        <button onClick={onReset} className="reset-btn">
+          리셋
+        </button>
+      </div>`
+          : `
+      <div className="info-section">
+        <p>이 페이지에서 ${feature} 관련 기능을 개발할 수 있습니다.</p>
+        <p>현재 카운터: {counter}</p>
+      </div>`
+      }
+    </div>
+  );
+}
+`;
+}
+
 function renderPackageJson(spec: AppSpec) {
   const appName = spec.idea?.title?.replace(/\s+/g, "_").toLowerCase() || "my_app_web";
   return JSON.stringify(
