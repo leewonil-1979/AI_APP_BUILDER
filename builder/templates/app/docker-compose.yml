@@ -6,10 +6,23 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3000:8080"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+    # Security enhancements
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    read_only: true
+    tmpfs:
+      - /tmp:rw,size=100M
+    user: "1001:1001"
 
   # 개발 환경용 (선택사항)
   app-dev:
@@ -19,9 +32,13 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
+      - .:/app:ro
       - /app/node_modules
     environment:
       - NODE_ENV=development
     command: npm run dev
     profiles: ["dev"]
+    # Development security
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"

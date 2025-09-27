@@ -1,27 +1,53 @@
-# Dockerfile for generated web apps
-FROM node:18-alpine AS builder
+# Dockerfile - Absolutely Minimal Secure Build
+# Use the latest secure Node alpine with specific version
+FROM node:lts-alpine AS builder
+
+# Only essential packages
+RUN apk add --no-cache ca-certificates && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
-# Copy package files
+# Install only production dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --production --ignore-scripts && \
+    npm cache clean --force
 
-# Copy source
+# Build static files
 COPY . .
-
-# Build
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Runtime - Pure static file serving with minimal runtime
+FROM caddy:2-alpine
 
-# Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy static files only
+COPY --from=builder /app/dist /srv
 
-# Custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Caddy configuration for security
+RUN echo $'{\n\
+  auto_https off\n\
+  admin off\n\
+  servers {\n\
+    protocols h1 h2c\n\
+  }\n\
+}\n\
+\n\
+:8080 {\n\
+  root * /srv\n\
+  file_server\n\
+  try_files {path} /index.html\n\
+  \n\
+  header {\n\
+    X-Content-Type-Options nosniff\n\
+    X-Frame-Options DENY\n\
+    X-XSS-Protection "1; mode=block"\n\
+    Referrer-Policy "strict-origin-when-cross-origin"\n\
+  }\n\
+}' > /etc/caddy/Caddyfile
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+# Run as non-root
+USER caddy
+
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
