@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "new": "tsx builder/scripts/new-app.ts",
+    "deploy": "tsx builder/scripts/deploy.ts",
     "validate": "npm run -ws --if-present lint && npm run -ws --if-present typecheck && npm run -ws --if-present test || exit 0",
     "test": "jest",
     "test:watch": "jest --watch"
