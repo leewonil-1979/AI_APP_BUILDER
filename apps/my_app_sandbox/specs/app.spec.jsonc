@@ -1,0 +1,7 @@
+// 최소 실행용 V1 축약 스펙(JSONC)
+{
+  "version": "1.0",
+  "meta": { "spec_id": "app-my_app_sandbox", "author": "you", "created_at": "2025-09-26" },
+  "idea": { "one_liner": "first app", "problem": "pipeline sanity" },
+  "scope": { "must_features": ["hello screen"] }
+}

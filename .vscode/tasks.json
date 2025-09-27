@@ -1,0 +1,75 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Check: print OPENAI key (first 10) [cmd]",
+      "type": "shell",
+      "command": "npx",
+      "args": [
+        "dotenv",
+        "-e",
+        "${workspaceFolder}\\.env",
+        "--",
+        "node",
+        "${workspaceFolder}\\builder\\scripts\\print-openai-key.mjs"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "problemMatcher": [],
+      "detail": ".env 로드 확인(앞 10자 출력)"
+    },
+    {
+      "label": "LLM: app:init (dotenv, pick app) [cmd]",
+      "type": "shell",
+      "command": "npx",
+      "args": [
+        "dotenv",
+        "-e",
+        "${workspaceFolder}\\.env",
+        "--",
+        "npm",
+        "--prefix",
+        "${input:appDir}",
+        "run",
+        "app:init:llm"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "problemMatcher": [],
+      "detail": "dotenv로 OPENAI_API_KEY 로드 → 선택 앱에서 app:init:llm 실행"
+    },
+    {
+      "label": "Rule-based: app:init (pick app) [cmd]",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "--prefix",
+        "${input:appDir}",
+        "run",
+        "app:init"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
+      "problemMatcher": [],
+      "detail": "규칙 기반 idea-to-spec → strip → check → A/B/C"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "appDir",
+      "type": "pickString",
+      "description": "앱 디렉토리 선택",
+      "options": [
+        ".\\apps\\my_app1",
+        ".\\apps\\my_app_sandbox"
+      ],
+      "default": ".\\apps\\my_app1"
+    }
+  ]
+}

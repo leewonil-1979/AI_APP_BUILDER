@@ -1,0 +1,15 @@
+{
+  "files.eol": "\n",
+  "editor.formatOnSave": true,
+  "files.insertFinalNewline": true,
+  "json.format.enable": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+
+  "files.encoding": "utf8",
+  "terminal.integrated.windowsEnableConpty": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.env.windows": {
+    "CHCP": "65001"
+  }
+}

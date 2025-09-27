@@ -1,0 +1,16 @@
+﻿{
+    "name":  "my_app_sandbox",
+    "private":  true,
+    "scripts":  {
+                    "spec:strip":  "tsx ../../builder/scripts/strip-jsonc.ts specs/app.spec.jsonc \u003e specs/app.spec.json",
+                    "spec:check":  "npx ajv validate -s ../../builder/specs/schema.json -d specs/app.spec.json -c ajv-formats",
+                    "a:orchestrate":  "tsx ../../builder/agents/a_orchestrator.ts --spec specs/app.spec.json",
+                    "b:codegen":  "tsx ../../builder/agents/b_codegen.ts --appPath .",
+                    "c:verify":  "tsx ../../builder/agents/c_verify_optimize.ts --appPath .",
+                    "app:init":  "npm run spec:strip \u0026\u0026 npm run spec:check \u0026\u0026 npm run a:orchestrate \u0026\u0026 npm run b:codegen \u0026\u0026 npm run c:verify",
+                    "validate":  "npm run -ws --if-present lint \u0026\u0026 npm run -ws --if-present typecheck \u0026\u0026 npm run -ws --if-present test || exit 0",
+                    "lint":  "echo lint skip (app)",
+                    "typecheck":  "echo typecheck skip (app)",
+                    "test":  "echo test skip (app)"
+                }
+}
