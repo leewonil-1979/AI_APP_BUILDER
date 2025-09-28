@@ -13,6 +13,59 @@ type AppSpec = {
   };
 };
 
+// 재생성 안전장치 - Gen Block 헬퍼
+const BEGIN = (key: string) => `// <gen:begin ${key}>`;
+const END = (key: string) => `// <gen:end ${key}>`;
+
+function upsertWithGenBlock(filePath: string, key: string, newContent: string) {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+  if (!fs.existsSync(filePath)) {
+    // 파일이 없으면 새로 생성
+    fs.writeFileSync(filePath, [BEGIN(key), newContent, END(key)].join("\n"), "utf8");
+    console.log(`📄 새 파일 생성: ${path.basename(filePath)}`);
+    return;
+  }
+
+  const oldContent = fs.readFileSync(filePath, "utf8");
+  const begin = BEGIN(key),
+    end = END(key);
+
+  if (!oldContent.includes(begin) || !oldContent.includes(end)) {
+    // 블록이 없으면 백업 후 추가
+    fs.copyFileSync(filePath, filePath + ".bak");
+    fs.writeFileSync(filePath, [oldContent, "", begin, newContent, end].join("\n"), "utf8");
+    console.log(`🔄 블록 추가: ${path.basename(filePath)} (백업: .bak)`);
+    return;
+  }
+
+  // 블록 교체
+  const regex = new RegExp(
+    `${begin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*?${end.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+    "m",
+  );
+  const updated = oldContent.replace(regex, `${begin}\n${newContent}\n${end}`);
+
+  if (updated !== oldContent) {
+    fs.copyFileSync(filePath, filePath + ".bak");
+    fs.writeFileSync(filePath, updated, "utf8");
+    console.log(`✅ 블록 업데이트: ${path.basename(filePath)} (백업: .bak)`);
+  } else {
+    console.log(`⏩ 변경사항 없음: ${path.basename(filePath)}`);
+  }
+}
+
+// 안전한 파일 작성 함수 (기존 writeFile 대체)
+function writeFileWithProtection(filePath: string, content: string, key?: string) {
+  if (key) {
+    upsertWithGenBlock(filePath, key, content);
+  } else {
+    ensureDir(path.dirname(filePath));
+    fs.writeFileSync(filePath, content, "utf8");
+  }
+}
+
 // 명령행 인수에서 appPath 가져오기
 const args = process.argv.slice(2);
 const appPathIndex = args.indexOf("--appPath");
@@ -569,16 +622,34 @@ async function main() {
   // 1) 베이스 디렉터리 생성
   ensureDir(OUT_DIR);
 
-  // 2) 파일 생성
+  // 2) 파일 생성 (안전장치 적용)
   writeFile(path.join(OUT_DIR, "package.json"), renderPackageJson(spec));
   writeFile(path.join(OUT_DIR, "vite.config.ts"), VITE_CONFIG_TS);
   writeFile(path.join(OUT_DIR, "tsconfig.json"), TS_CONFIG);
   writeFile(path.join(OUT_DIR, "tsconfig.node.json"), TS_CONFIG_NODE);
   writeFile(path.join(OUT_DIR, "index.html"), renderIndexHtml(spec));
   writeFile(path.join(OUT_DIR, "src", "main.tsx"), renderMainTsx(spec));
-  writeFile(path.join(OUT_DIR, "src", "App.tsx"), renderAppTsx(spec));
+
+  // 자주 수정되는 파일들은 gen-block으로 보호
+  writeFileWithProtection(path.join(OUT_DIR, "src", "App.tsx"), renderAppTsx(spec), "main-app");
+  writeFileWithProtection(path.join(OUT_DIR, "src", "types.ts"), renderTypes(spec), "types");
+  writeFileWithProtection(path.join(OUT_DIR, "src", "hooks.ts"), renderHooks(spec), "hooks");
+
+  // 스타일은 일반 생성 (덜 수정됨)
   writeFile(path.join(OUT_DIR, "src", "App.css"), APP_CSS);
   writeFile(path.join(OUT_DIR, "src", "index.css"), INDEX_CSS);
+
+  // 2.5) 템플릿 버저닝 메타데이터 생성
+  const meta = {
+    generatedAt: new Date().toISOString(),
+    template: { name: "react", version: "v1" },
+    specRef: path.relative(process.cwd(), SPEC_PATH),
+    generator: "b_codegen.ts",
+    features: spec.scope?.must_features || [],
+    safeMode: true, // 재생성 안전장치 활성화
+  };
+  fs.writeFileSync(path.join(OUT_DIR, ".gen-meta.json"), JSON.stringify(meta, null, 2));
+  console.log("📋 메타데이터 생성: .gen-meta.json");
 
   // 3) 리포트 생성
   const outDir = path.join(process.cwd(), "out");

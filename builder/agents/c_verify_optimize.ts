@@ -1,7 +1,61 @@
-// 목표: generated/web에서 npm i -> build -> 간단 리포트
+//목표: generated/web에서 npm i -> build -> 간단 리포트
 import { spawnSync } from "child_process";
 import path from "path";
 import fs from "fs";
+
+// 번들 사이즈 체크 함수
+function formatBytes(bytes: number): string {
+  return (bytes / 1024).toFixed(1) + "KB";
+}
+
+function checkBundleSize(distDir: string): number {
+  const assetsDir = path.join(distDir, "assets");
+  if (!fs.existsSync(assetsDir)) {
+    console.warn("⚠️ assets 폴더가 없습니다");
+    return 0;
+  }
+
+  const files = fs.readdirSync(assetsDir).filter((f) => /\.(js|css)$/.test(f));
+  let totalSize = 0;
+  let maxSize = 0;
+  let worstFile = "";
+
+  console.log("📊 번들 분석:");
+  for (const file of files) {
+    const filePath = path.join(assetsDir, file);
+    const size = fs.statSync(filePath).size;
+    totalSize += size;
+
+    console.log(`  ${file}: ${formatBytes(size)}`);
+
+    if (size > maxSize) {
+      maxSize = size;
+      worstFile = file;
+    }
+  }
+
+  // 임계치 설정
+  const TOTAL_LIMIT = 500 * 1024; // 500KB
+  const CHUNK_LIMIT = 300 * 1024; // 300KB
+
+  console.log(`📈 총 크기: ${formatBytes(totalSize)}`);
+  console.log(`📈 최대 청크: ${formatBytes(maxSize)} (${worstFile})`);
+
+  let status = 0;
+  if (totalSize > TOTAL_LIMIT) {
+    console.log(`⚠️ 총 번들 크기가 권장치(${formatBytes(TOTAL_LIMIT)})를 초과했습니다`);
+    status = 1;
+  }
+  if (maxSize > CHUNK_LIMIT) {
+    console.log(`⚠️ 단일 청크 크기가 권장치(${formatBytes(CHUNK_LIMIT)})를 초과했습니다`);
+    status = 1;
+  }
+  if (status === 0) {
+    console.log("✅ 번들 크기가 권장 범위 내입니다");
+  }
+
+  return status;
+}
 
 // 명령행 인수에서 appPath 가져오기
 const args = process.argv.slice(2);
@@ -120,7 +174,7 @@ async function main() {
       throw new Error("빌드 실패");
     }
 
-    // Step 4: 빌드 결과 확인
+    // Step 4: 빌드 결과 확인 + 성능 체크
     const distDir = path.join(OUT_DIR, "dist");
     if (fs.existsSync(distDir)) {
       const distFiles = fs.readdirSync(distDir);
@@ -129,6 +183,20 @@ async function main() {
         distDir: distDir,
         files: distFiles,
       };
+
+      // Step 4.5: 번들 사이즈 체크
+      console.log("📊 번들 사이즈 분석...");
+      const bundleStatus = checkBundleSize(distDir);
+      results.steps.push({
+        name: "bundle size check",
+        status: bundleStatus === 0 ? "success" : "warning",
+        exitCode: bundleStatus,
+      });
+
+      if (bundleStatus !== 0) {
+        console.log("⚠️ 번들 사이즈가 권장 크기를 초과했지만 계속 진행합니다.");
+        results.errors.push("Bundle size exceeded recommended limits");
+      }
     }
 
     results.status = "success";

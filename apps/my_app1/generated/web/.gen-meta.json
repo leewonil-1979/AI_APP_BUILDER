@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2025-09-28T01:37:04.178Z",
+  "template": {
+    "name": "react",
+    "version": "v1"
+  },
+  "specRef": "specs\\app.spec.json",
+  "generator": "b_codegen.ts",
+  "features": [
+    "홈",
+    "기록추가"
+  ],
+  "safeMode": true
+}
