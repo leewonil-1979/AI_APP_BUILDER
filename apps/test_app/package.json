@@ -1,0 +1,16 @@
+{
+  "name": "test_app",
+  "private": true,
+  "scripts": {
+    "spec:strip": "tsx ../../builder/scripts/strip-jsonc.ts specs/app.spec.jsonc > specs/app.spec.json",
+    "spec:check": "npx ajv validate -s ../../builder/specs/schema.json -d specs/app.spec.json -c ajv-formats",
+    "a:orchestrate": "tsx ../../builder/agents/a_orchestrator.ts --spec specs/app.spec.json",
+    "b:codegen": "tsx ../../builder/agents/b_codegen.ts --appPath .",
+    "c:verify": "tsx ../../builder/agents/c_verify_optimize.ts --appPath .",
+    "app:init": "npm run spec:strip && npm run spec:check && npm run a:orchestrate && npm run b:codegen && npm run c:verify",
+    "lint": "echo lint skip (template)",
+    "typecheck": "echo typecheck skip (template)",
+    "test": "echo test skip (template)"
+
+  }
+}
