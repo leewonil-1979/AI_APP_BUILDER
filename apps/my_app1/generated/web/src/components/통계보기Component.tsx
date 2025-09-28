@@ -1,18 +1,27 @@
 // 통계보기 Material-UI 컴포넌트
 import {
-  Box, Paper, Typography, Button, TextField, Card, CardContent,
-  Dialog, DialogTitle, DialogContent, DialogActions, Stack
-} from '@mui/material';
-import { useState } from 'react';
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+} from "@mui/material";
+import { useState } from "react";
 
 export const 통계보기Component = () => {
-  const [data, setData] = useState('');
+  const [data, setData] = useState("");
   const [open, setOpen] = useState(false);
-  
+
   const handleAdd = () => {
     if (data.trim()) {
-      console.log('Adding:', data);
-      setData('');
+      console.log("Adding:", data);
+      setData("");
       setOpen(false);
     }
   };
@@ -23,24 +32,18 @@ export const 통계보기Component = () => {
         <Typography variant="h4" component="h1">
           📱 통계보기
         </Typography>
-        
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={() => setOpen(true)}
-        >
+
+        <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
           새 통계보기 추가
         </Button>
-        
+
         <Card>
           <CardContent>
-            <Typography>
-              여기에 통계보기 목록이 표시됩니다.
-            </Typography>
+            <Typography>여기에 통계보기 목록이 표시됩니다.</Typography>
           </CardContent>
         </Card>
       </Stack>
-      
+
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>통계보기 추가</DialogTitle>
         <DialogContent>
@@ -56,7 +59,9 @@ export const 통계보기Component = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>취소</Button>
-          <Button onClick={handleAdd} variant="contained">추가</Button>
+          <Button onClick={handleAdd} variant="contained">
+            추가
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
