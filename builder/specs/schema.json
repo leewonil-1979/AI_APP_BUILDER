@@ -10,7 +10,22 @@
       "properties": {
         "title": { "type": "string" },
         "one_liner": { "type": "string" },
-        "problem": { "type": "string" }
+        "problem": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "landing",
+            "dashboard",
+            "admin",
+            "portfolio",
+            "blog",
+            "ecommerce",
+            "social",
+            "productivity",
+            "other"
+          ],
+          "description": "앱 유형 - UI 라이브러리 자동 선택에 사용"
+        }
       },
       "additionalProperties": true
     },
@@ -18,6 +33,94 @@
       "type": "object",
       "properties": {
         "must_features": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["simple", "standard", "advanced", "pro"],
+      "default": "standard",
+      "description": "앱 복잡도 - 생성될 코드의 고도화 수준 결정"
+    },
+    "features": {
+      "type": "object",
+      "description": "세부 기능 설정 - 각 영역별 구현 수준 선택",
+      "properties": {
+        "stateManagement": {
+          "type": "string",
+          "enum": ["basic", "zustand", "redux", "auto"],
+          "default": "auto",
+          "description": "상태 관리: basic(useState), zustand(중소형), redux(대형), auto(자동선택)"
+        },
+        "routing": {
+          "type": "string",
+          "enum": ["simple", "react-router", "advanced", "auto"],
+          "default": "auto",
+          "description": "라우팅: simple(조건부), react-router(기본), advanced(중첩+가드), auto(자동선택)"
+        },
+        "ui": {
+          "type": "string",
+          "enum": ["minimal", "chakra", "material", "tailwind", "antd", "auto"],
+          "default": "auto",
+          "description": "UI 라이브러리: auto는 앱 유형에 따라 자동 선택"
+        },
+        "forms": {
+          "type": "string",
+          "enum": ["basic", "react-hook-form", "auto"],
+          "default": "auto",
+          "description": "폼 처리: basic(controlled), react-hook-form(고급), auto(자동선택)"
+        },
+        "dataFetching": {
+          "type": "string",
+          "enum": ["fetch", "tanstack-query", "swr", "auto"],
+          "default": "auto",
+          "description": "데이터 페칭: fetch(기본), tanstack-query(캐싱), swr(실시간), auto(자동선택)"
+        },
+        "styling": {
+          "type": "string",
+          "enum": ["css", "css-modules", "styled-components", "emotion", "auto"],
+          "default": "auto",
+          "description": "스타일링 방식: UI 라이브러리에 따라 자동 선택"
+        },
+        "testing": {
+          "type": "boolean",
+          "default": false,
+          "description": "테스트 코드 자동 생성 여부"
+        },
+        "typescript": {
+          "type": "string",
+          "enum": ["basic", "strict", "advanced"],
+          "default": "strict",
+          "description": "TypeScript 설정 수준"
+        },
+        "bundleOptimization": {
+          "type": "boolean",
+          "default": true,
+          "description": "번들 최적화 활성화 (코드스플리팅, 트리셰이킹)"
+        },
+        "pwa": {
+          "type": "boolean",
+          "default": false,
+          "description": "Progressive Web App 기능 활성화"
+        }
+      },
+      "additionalProperties": true
+    },
+    "deployment": {
+      "type": "object",
+      "description": "배포 설정",
+      "properties": {
+        "target": {
+          "type": "string",
+          "enum": ["static", "vercel", "netlify", "docker", "none"],
+          "default": "static",
+          "description": "배포 대상 플랫폼"
+        },
+        "environment": {
+          "type": "object",
+          "description": "환경변수 설정",
+          "additionalProperties": { "type": "string" }
+        }
       },
       "additionalProperties": true
     }

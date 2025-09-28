@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-09-28T01:37:04.178Z",
+  "generatedAt": "2025-09-28T06:47:30.808Z",
   "template": {
     "name": "react",
     "version": "v1"
@@ -8,7 +8,18 @@
   "generator": "b_codegen.ts",
   "features": [
     "홈",
-    "기록추가"
+    "기록추가",
+    "통계보기",
+    "설정"
   ],
-  "safeMode": true
+  "safeMode": true,
+  "techStack": {
+    "complexity": "standard",
+    "appType": "productivity",
+    "stateManagement": "zustand",
+    "routing": "react-router",
+    "ui": "material",
+    "typescript": "strict",
+    "bundleOptimization": true
+  }
 }

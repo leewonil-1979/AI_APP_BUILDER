@@ -1,6 +1,6 @@
 // <gen:begin types>
 // 자동 생성된 타입 정의
-export type PageId = '홈' | '기록추가' | '통계보기' | '설정';
+export type PageId = '홈' | '기록추가';
 
 export type AppState = {
   currentPage: PageId;
@@ -27,18 +27,6 @@ export const FEATURES: Feature[] = [
     title: '기록추가',
     description: '기록추가 기능을 구현할 수 있습니다.',
     hasCounter: true
-  },
-  {
-    id: '통계보기',
-    title: '통계보기',
-    description: '통계보기 기능을 구현할 수 있습니다.',
-    hasCounter: false
-  },
-  {
-    id: '설정',
-    title: '설정',
-    description: '설정 기능을 구현할 수 있습니다.',
-    hasCounter: false
   }
 ];
 

@@ -4,7 +4,7 @@ import { AppState, PageId, FEATURES } from './types';
 
 const initialState: AppState = {
   currentPage: '홈',
-  counters: {'홈': 0, '기록추가': 0, '통계보기': 0, '설정': 0},
+  counters: {'홈': 0, '기록추가': 0},
   lastUpdated: new Date().toISOString()
 };
 

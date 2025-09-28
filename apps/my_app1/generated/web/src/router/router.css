@@ -1,0 +1,41 @@
+/* React Router 네비게이션 스타일 */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-navigation {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e1e1e1;
+  padding: 16px 24px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link {
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.nav-link.active {
+  background: #0078d4;
+  color: white;
+}
+
+.app-main {
+  flex: 1;
+  padding: 24px;
+}

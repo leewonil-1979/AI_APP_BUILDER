@@ -1,3 +1,4 @@
+// <gen:begin main-app>
 import { useState } from 'react'
 import './App.css'
 
@@ -33,6 +34,22 @@ function App() {
             </div>
           </div>
         )
+      case '통계보기':
+        return (
+          <div className="page">
+            <h2>📱 통계보기 페이지</h2>
+            <p>통계보기 기능을 구현할 수 있습니다.</p>
+            
+          </div>
+        )
+      case '설정':
+        return (
+          <div className="page">
+            <h2>📱 설정 페이지</h2>
+            <p>설정 기능을 구현할 수 있습니다.</p>
+            
+          </div>
+        )
       default:
         return <div className="page"><h2>페이지를 찾을 수 없습니다</h2></div>
     }
@@ -63,6 +80,20 @@ function App() {
           >
             기록추가
           </button>
+          <button 
+            key="통계보기"
+            onClick={() => setCurrentPage('통계보기')}
+            className={`nav-btn ${currentPage === '통계보기' ? 'active' : ''}`}
+          >
+            통계보기
+          </button>
+          <button 
+            key="설정"
+            onClick={() => setCurrentPage('설정')}
+            className={`nav-btn ${currentPage === '설정' ? 'active' : ''}`}
+          >
+            설정
+          </button>
         </div>
       </nav>
 
@@ -72,10 +103,12 @@ function App() {
 
       <footer className="App-footer">
         <p>현재 페이지: <strong>{currentPage}</strong></p>
-        <p>총 기능 수: {2}</p>
+        <p>총 기능 수: {4}</p>
       </footer>
     </div>
   )
 }
 
 export default App
+
+// <gen:end main-app>

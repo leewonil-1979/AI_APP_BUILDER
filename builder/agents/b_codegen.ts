@@ -1,15 +1,49 @@
 // 목표: specs/app.spec.json을 읽어 Vite+React 최소 앱을 apps/my_app1/generated/web 에 생성
 import fs from "fs";
 import path from "path";
+import {
+  resolvePackages,
+  BASE_DEPENDENCIES,
+  BASE_DEV_DEPENDENCIES,
+} from "../utils/package-resolver";
+import { generateTechStackCode } from "../templates/code-generators";
 
-type AppSpec = {
+export type AppSpec = {
   version?: string;
   idea?: {
     title?: string;
     one_liner?: string;
+    problem?: string;
+    type?:
+      | "landing"
+      | "dashboard"
+      | "admin"
+      | "portfolio"
+      | "blog"
+      | "ecommerce"
+      | "social"
+      | "productivity"
+      | "other";
   };
   scope?: {
     must_features?: string[];
+  };
+  complexity?: "simple" | "standard" | "advanced" | "pro";
+  features?: {
+    stateManagement?: "basic" | "zustand" | "redux" | "auto";
+    routing?: "simple" | "react-router" | "advanced" | "auto";
+    ui?: "minimal" | "chakra" | "material" | "tailwind" | "antd" | "auto";
+    forms?: "basic" | "react-hook-form" | "auto";
+    dataFetching?: "fetch" | "tanstack-query" | "swr" | "auto";
+    styling?: "css" | "css-modules" | "styled-components" | "emotion" | "auto";
+    testing?: boolean;
+    typescript?: "basic" | "strict" | "advanced";
+    bundleOptimization?: boolean;
+    pwa?: boolean;
+  };
+  deployment?: {
+    target?: "static" | "vercel" | "netlify" | "docker" | "none";
+    environment?: Record<string, string>;
   };
 };
 
@@ -63,6 +97,121 @@ function writeFileWithProtection(filePath: string, content: string, key?: string
   } else {
     ensureDir(path.dirname(filePath));
     fs.writeFileSync(filePath, content, "utf8");
+  }
+}
+
+// 스펙 정규화 및 기본값 설정 (Tier 1-2 지원)
+function normalizeSpec(rawSpec: AppSpec): AppSpec {
+  const spec: AppSpec = {
+    ...rawSpec,
+    complexity: rawSpec.complexity || "standard",
+    features: {
+      stateManagement: "auto",
+      routing: "auto",
+      ui: "auto",
+      forms: "auto",
+      dataFetching: "auto",
+      styling: "auto",
+      testing: false,
+      typescript: "strict",
+      bundleOptimization: true,
+      pwa: false,
+      ...rawSpec.features,
+    },
+    deployment: {
+      target: "static",
+      environment: {},
+      ...rawSpec.deployment,
+    },
+  };
+
+  // 앱 타입 자동 추론 (타이틀/설명 기반)
+  if (!spec.idea?.type) {
+    spec.idea = { ...spec.idea, type: inferAppType(spec) };
+  }
+
+  return spec;
+}
+
+// 앱 타입 자동 추론
+function inferAppType(
+  spec: AppSpec,
+):
+  | "landing"
+  | "dashboard"
+  | "admin"
+  | "portfolio"
+  | "blog"
+  | "ecommerce"
+  | "social"
+  | "productivity"
+  | "other" {
+  const title = spec.idea?.title?.toLowerCase() || "";
+  const description = spec.idea?.one_liner?.toLowerCase() || "";
+  const text = `${title} ${description}`;
+
+  if (text.includes("dashboard") || text.includes("admin") || text.includes("관리")) return "admin";
+  if (text.includes("portfolio") || text.includes("포트폴리오")) return "portfolio";
+  if (text.includes("blog") || text.includes("블로그")) return "blog";
+  if (text.includes("shop") || text.includes("store") || text.includes("쇼핑")) return "ecommerce";
+  if (text.includes("social") || text.includes("소셜") || text.includes("커뮤니티"))
+    return "social";
+  if (text.includes("landing") || text.includes("랜딩")) return "landing";
+  if (text.includes("todo") || text.includes("task") || text.includes("할일"))
+    return "productivity";
+
+  return "other";
+}
+
+// 자동 선택 로직들
+function resolveStateManagement(spec: AppSpec): "basic" | "zustand" | "redux" {
+  if (spec.features?.stateManagement && spec.features.stateManagement !== "auto") {
+    return spec.features.stateManagement;
+  }
+
+  const complexity = spec.complexity;
+  const featureCount = spec.scope?.must_features?.length || 0;
+
+  if (complexity === "simple" || featureCount <= 2) return "basic";
+  if (complexity === "pro" || featureCount > 8) return "redux";
+  return "zustand"; // standard, advanced의 기본값
+}
+
+function resolveRouting(spec: AppSpec): "simple" | "react-router" | "advanced" {
+  if (spec.features?.routing && spec.features.routing !== "auto") {
+    return spec.features.routing;
+  }
+
+  const complexity = spec.complexity;
+  const featureCount = spec.scope?.must_features?.length || 0;
+
+  if (complexity === "simple" || featureCount <= 3) return "simple";
+  if (complexity === "advanced" || complexity === "pro") return "advanced";
+  return "react-router"; // standard의 기본값
+}
+
+function resolveUI(spec: AppSpec): "minimal" | "chakra" | "material" | "tailwind" | "antd" {
+  if (spec.features?.ui && spec.features.ui !== "auto") {
+    return spec.features.ui;
+  }
+
+  const appType = spec.idea?.type;
+  const complexity = spec.complexity;
+
+  if (complexity === "simple") return "minimal";
+
+  switch (appType) {
+    case "admin":
+    case "dashboard":
+      return "antd";
+    case "portfolio":
+    case "landing":
+      return "tailwind";
+    case "blog":
+    case "social":
+      return "chakra";
+    default:
+      return "material";
   }
 }
 
@@ -230,8 +379,24 @@ export function ${feature}Page({ counter, onIncrement, onReset }: ${feature}Page
 `;
 }
 
-function renderPackageJson(spec: AppSpec) {
+async function renderPackageJson(spec: AppSpec) {
   const appName = spec.idea?.title?.replace(/\s+/g, "_").toLowerCase() || "my_app_web";
+
+  // 정규화된 스펙에서 복잡도와 기능 추출
+  const normalizedSpec = normalizeSpec(spec);
+  const complexity = normalizedSpec.complexity || "simple";
+  const features = normalizedSpec.features || {};
+
+  console.log(`🔍 패키지 해결 중... (복잡도: ${complexity})`);
+
+  // 실시간 패키지 정보 조회 및 선택
+  const { dependencies: additionalDeps, devDependencies: additionalDevDeps } =
+    await resolvePackages(complexity, features);
+
+  // 기본 패키지와 추가 패키지 병합
+  const allDependencies = { ...BASE_DEPENDENCIES, ...additionalDeps };
+  const allDevDependencies = { ...BASE_DEV_DEPENDENCIES, ...additionalDevDeps };
+
   return JSON.stringify(
     {
       name: appName,
@@ -244,22 +409,8 @@ function renderPackageJson(spec: AppSpec) {
         preview: "vite preview",
         lint: "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
       },
-      dependencies: {
-        react: "^18.2.0",
-        "react-dom": "^18.2.0",
-      },
-      devDependencies: {
-        "@types/react": "^18.2.43",
-        "@types/react-dom": "^18.2.17",
-        "@typescript-eslint/eslint-plugin": "^6.14.0",
-        "@typescript-eslint/parser": "^6.14.0",
-        "@vitejs/plugin-react": "^4.2.1",
-        eslint: "^8.55.0",
-        "eslint-plugin-react-hooks": "^4.6.0",
-        "eslint-plugin-react-refresh": "^0.4.5",
-        typescript: "^5.2.2",
-        vite: "^5.0.8",
-      },
+      dependencies: allDependencies,
+      devDependencies: allDevDependencies,
     },
     null,
     2,
@@ -617,25 +768,58 @@ async function main() {
     process.exit(1);
   }
 
-  const spec: AppSpec = JSON.parse(fs.readFileSync(SPEC_PATH, "utf8"));
+  const rawSpec: AppSpec = JSON.parse(fs.readFileSync(SPEC_PATH, "utf8"));
+  const spec = normalizeSpec(rawSpec);
+
+  // 선택된 기술 스택 로깅
+  const stateManagement = resolveStateManagement(spec);
+  const routing = resolveRouting(spec);
+  const ui = resolveUI(spec);
+
+  console.log("🎯 선택된 기술 스택:");
+  console.log(`  📊 상태 관리: ${stateManagement}`);
+  console.log(`  🗺️  라우팅: ${routing}`);
+  console.log(`  🎨 UI 라이브러리: ${ui}`);
+  console.log(`  🏗️  복잡도: ${spec.complexity}`);
+  console.log(`  📱 앱 타입: ${spec.idea?.type}`);
 
   // 1) 베이스 디렉터리 생성
   ensureDir(OUT_DIR);
 
-  // 2) 파일 생성 (안전장치 적용)
-  writeFile(path.join(OUT_DIR, "package.json"), renderPackageJson(spec));
+  // 2) Tier 2: 기술 스택별 코드 생성
+  const techStack = {
+    stateManagement: stateManagement,
+    routing: routing,
+    ui: ui,
+    forms: "react-hook-form", // 임시로 고정
+    dataFetching: "fetch", // 임시로 고정
+    styling: "css", // 임시로 고정
+  };
+
+  console.log(`🎨 Tier 2: 기술 스택별 코드 생성 중...`);
+  const { files: techStackFiles, mainAppCode } = generateTechStackCode(spec, techStack);
+
+  // 3) 기본 파일 생성 (안전장치 적용)
+  writeFile(path.join(OUT_DIR, "package.json"), await renderPackageJson(spec));
   writeFile(path.join(OUT_DIR, "vite.config.ts"), VITE_CONFIG_TS);
   writeFile(path.join(OUT_DIR, "tsconfig.json"), TS_CONFIG);
   writeFile(path.join(OUT_DIR, "tsconfig.node.json"), TS_CONFIG_NODE);
   writeFile(path.join(OUT_DIR, "index.html"), renderIndexHtml(spec));
   writeFile(path.join(OUT_DIR, "src", "main.tsx"), renderMainTsx(spec));
 
-  // 자주 수정되는 파일들은 gen-block으로 보호
-  writeFileWithProtection(path.join(OUT_DIR, "src", "App.tsx"), renderAppTsx(spec), "main-app");
+  // 4) 기술 스택별 파일들 생성
+  Object.entries(techStackFiles).forEach(([filePath, content]) => {
+    const fullPath = path.join(OUT_DIR, filePath);
+    console.log(`📄 생성: ${filePath}`);
+    writeFile(fullPath, content);
+  });
+
+  // 5) 메인 App.tsx는 gen-block으로 보호하되 Tier 2 코드 사용
+  writeFileWithProtection(path.join(OUT_DIR, "src", "App.tsx"), mainAppCode, "main-app");
   writeFileWithProtection(path.join(OUT_DIR, "src", "types.ts"), renderTypes(spec), "types");
   writeFileWithProtection(path.join(OUT_DIR, "src", "hooks.ts"), renderHooks(spec), "hooks");
 
-  // 스타일은 일반 생성 (덜 수정됨)
+  // 6) 스타일은 일반 생성 (덜 수정됨)
   writeFile(path.join(OUT_DIR, "src", "App.css"), APP_CSS);
   writeFile(path.join(OUT_DIR, "src", "index.css"), INDEX_CSS);
 
@@ -647,6 +831,15 @@ async function main() {
     generator: "b_codegen.ts",
     features: spec.scope?.must_features || [],
     safeMode: true, // 재생성 안전장치 활성화
+    techStack: {
+      complexity: spec.complexity,
+      appType: spec.idea?.type,
+      stateManagement: stateManagement,
+      routing: routing,
+      ui: ui,
+      typescript: spec.features?.typescript || "strict",
+      bundleOptimization: spec.features?.bundleOptimization !== false,
+    },
   };
   fs.writeFileSync(path.join(OUT_DIR, ".gen-meta.json"), JSON.stringify(meta, null, 2));
   console.log("📋 메타데이터 생성: .gen-meta.json");
