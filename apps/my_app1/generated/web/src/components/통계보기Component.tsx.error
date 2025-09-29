@@ -1,9 +1,10 @@
-// AR 손씻기 습관 유도 - 통계보기 컴포넌트 (Tier 4 Phase 1: 고급 분석 - 간소화)
+// AR 손씻기 습관 유도 - 통계보기 컴포넌트 (Tier 4 Phase 1: 고급 분석)
 import {
   Box,
   Typography,
   Card,
   CardContent,
+  Grid,
   Chip,
   LinearProgress,
   Stack,
@@ -79,6 +80,24 @@ const calculateAdvancedStats = (records: any[], timeRange: TimeRange) => {
     return acc;
   }, {});
 
+  // 시간대별 분석 (24시간 기준)
+  const hourlyStats = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
+  filteredRecords.forEach((record) => {
+    const hour = new Date(record.timestamp).getHours();
+    hourlyStats[hour].count++;
+  });
+
+  // 일별 분석 (최근 30일)
+  const dailyStats = Array.from({ length: 30 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toDateString();
+    const count = filteredRecords.filter(
+      (r) => new Date(r.timestamp).toDateString() === dateStr,
+    ).length;
+    return { date: dateStr, count, day: i };
+  }).reverse();
+
   // 연속 기록 계산
   let currentStreak = 0;
   let longestStreak = 0;
@@ -118,6 +137,8 @@ const calculateAdvancedStats = (records: any[], timeRange: TimeRange) => {
     avgDuration,
     qualityDistribution,
     locationStats,
+    hourlyStats,
+    dailyStats,
     currentStreak,
     longestStreak,
     arUsageRate,
@@ -183,7 +204,7 @@ export const 통계보기Component = () => {
   // 개선 제안 생성
   const improvementSuggestions = useMemo(() => {
     const suggestions = [];
-    const { qualityDistribution, avgDuration, arUsageRate } = stats;
+    const { qualityDistribution, avgDuration, arUsageRate, currentStreak, locationStats } = stats;
 
     if (qualityDistribution.poor > qualityDistribution.excellent) {
       suggestions.push({
@@ -212,6 +233,31 @@ export const 통계보기Component = () => {
         title: "AR 기능 활용",
         description: "AR 가이드로 더 정확한 손씻기를 연습해보세요",
         color: "#9c27b0",
+      });
+    }
+
+    if (currentStreak < 3) {
+      suggestions.push({
+        type: "consistency",
+        icon: "📅",
+        title: "꾸준함 만들기",
+        description: "매일 꾸준히 기록해서 습관을 만들어보세요",
+        color: "#2196f3",
+      });
+    }
+
+    const homeWashes = locationStats["집"] || 0;
+    const totalWashes = Object.values(locationStats).reduce(
+      (sum: number, count) => sum + (count as number),
+      0,
+    );
+    if (homeWashes < totalWashes * 0.3 && totalWashes > 0) {
+      suggestions.push({
+        type: "location",
+        icon: "🏠",
+        title: "집에서도 실천하기",
+        description: "집에서의 손씻기도 꾸준히 기록해보세요",
+        color: "#4caf50",
       });
     }
 
@@ -263,21 +309,20 @@ export const 통계보기Component = () => {
                 일별
               </Button>
               <Button
+                variant={chartType === "시간대별" ? "contained" : "outlined"}
+                onClick={() => setChartType("시간대별")}
+              >
+                시간대별
+              </Button>
+              <Button
                 variant={chartType === "품질별" ? "contained" : "outlined"}
                 onClick={() => setChartType("품질별")}
               >
                 품질별
               </Button>
-              <Button
-                variant={chartType === "위치별" ? "contained" : "outlined"}
-                onClick={() => setChartType("위치별")}
-              >
-                위치별
-              </Button>
             </ButtonGroup>
           </Stack>
         </Box>
-
         {/* 성취 레벨 카드 */}
         <Card
           sx={{
@@ -313,10 +358,9 @@ export const 통계보기Component = () => {
             </Stack>
           </CardContent>
         </Card>
-
         {/* 핵심 지표 */}
-        <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap" }}>
-          <Card sx={{ flex: 1, minWidth: 200 }}>
+        <Stack direction="row" spacing={3} sx={{ flexWrap: "wrap" }}>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
             <CardContent sx={{ textAlign: "center" }}>
               <Avatar sx={{ bgcolor: "#2196f3", mx: "auto", mb: 2, width: 56, height: 56 }}>
                 <Typography variant="h5">🚿</Typography>
@@ -333,7 +377,7 @@ export const 통계보기Component = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ flex: 1, minWidth: 200 }}>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
             <CardContent sx={{ textAlign: "center" }}>
               <Avatar sx={{ bgcolor: "#4caf50", mx: "auto", mb: 2, width: 56, height: 56 }}>
                 <Typography variant="h5">⏱️</Typography>
@@ -352,7 +396,7 @@ export const 통계보기Component = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ flex: 1, minWidth: 200 }}>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
             <CardContent sx={{ textAlign: "center" }}>
               <Avatar sx={{ bgcolor: "#ff9800", mx: "auto", mb: 2, width: 56, height: 56 }}>
                 <Typography variant="h5">🔥</Typography>
@@ -369,7 +413,7 @@ export const 통계보기Component = () => {
             </CardContent>
           </Card>
 
-          <Card sx={{ flex: 1, minWidth: 200 }}>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
             <CardContent sx={{ textAlign: "center" }}>
               <Avatar sx={{ bgcolor: "#9c27b0", mx: "auto", mb: 2, width: 56, height: 56 }}>
                 <Typography variant="h5">📱</Typography>
@@ -388,14 +432,86 @@ export const 통계보기Component = () => {
               />
             </CardContent>
           </Card>
-        </Stack>
-
+        </Stack>{" "}
         {/* 차트 영역 */}
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               📈 {chartType} 분석 ({timeRange})
             </Typography>
+
+            {chartType === "일별" && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                  최근 30일간 일별 손씻기 패턴
+                </Typography>
+                <Stack spacing={1}>
+                  {stats.dailyStats.slice(-10).map((day) => (
+                    <Box key={day.date} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Typography variant="body2" sx={{ minWidth: 80, fontSize: "0.8rem" }}>
+                        {new Date(day.date).toLocaleDateString("ko-KR", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={
+                          day.count > 0
+                            ? Math.min(
+                                100,
+                                (day.count /
+                                  Math.max(1, Math.max(...stats.dailyStats.map((d) => d.count)))) *
+                                  100,
+                              )
+                            : 0
+                        }
+                        sx={{ flex: 1, height: 8 }}
+                      />
+                      <Typography variant="body2" sx={{ minWidth: 30, textAlign: "right" }}>
+                        {day.count}회
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {chartType === "시간대별" && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                  24시간 기준 시간대별 손씻기 빈도
+                </Typography>
+                <Grid container spacing={1}>
+                  {[0, 1, 2, 3, 4, 5].map((period) => {
+                    const startHour = period * 4;
+                    const endHour = startHour + 3;
+                    const periodCount = stats.hourlyStats
+                      .slice(startHour, endHour + 1)
+                      .reduce((sum, h) => sum + h.count, 0);
+                    const maxCount = Math.max(...stats.hourlyStats.map((h) => h.count));
+
+                    return (
+                      <Grid item xs={2} key={period}>
+                        <Paper sx={{ p: 2, textAlign: "center" }}>
+                          <Typography variant="caption" color="textSecondary">
+                            {startHour}:00-{endHour + 1}:00
+                          </Typography>
+                          <Typography variant="h6" color="primary">
+                            {periodCount}
+                          </Typography>
+                          <LinearProgress
+                            variant="determinate"
+                            value={maxCount > 0 ? (periodCount / maxCount) * 100 : 0}
+                            sx={{ mt: 1 }}
+                          />
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              </Box>
+            )}
 
             {chartType === "품질별" && (
               <Box sx={{ mt: 2 }}>
@@ -434,58 +550,8 @@ export const 통계보기Component = () => {
                 </Stack>
               </Box>
             )}
-
-            {chartType === "위치별" && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                  손씻기 위치별 분포
-                </Typography>
-                <Stack spacing={2}>
-                  {Object.entries(stats.locationStats)
-                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                    .map(([location, count]) => {
-                      const percentage =
-                        stats.totalWashes > 0 ? ((count as number) / stats.totalWashes) * 100 : 0;
-                      const locationEmoji: Record<string, string> = {
-                        집: "🏠",
-                        회사: "🏢",
-                        식당: "🍽️",
-                        화장실: "🚻",
-                        기타: "🌍",
-                      };
-
-                      return (
-                        <Box key={location} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          <Avatar sx={{ bgcolor: "#2196f3", width: 40, height: 40 }}>
-                            <Typography>{locationEmoji[location] || "📍"}</Typography>
-                          </Avatar>
-                          <Box flex={1}>
-                            <Typography variant="body1" fontWeight="bold">
-                              {location}
-                            </Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              value={percentage}
-                              sx={{ mt: 0.5 }}
-                            />
-                          </Box>
-                          <Stack alignItems="flex-end">
-                            <Typography variant="h6" color="primary">
-                              {count as number}회
-                            </Typography>
-                            <Typography variant="caption" color="textSecondary">
-                              {percentage.toFixed(1)}%
-                            </Typography>
-                          </Stack>
-                        </Box>
-                      );
-                    })}
-                </Stack>
-              </Box>
-            )}
           </CardContent>
         </Card>
-
         {/* 개선 제안 */}
         {improvementSuggestions.length > 0 && (
           <Card>
@@ -511,7 +577,51 @@ export const 통계보기Component = () => {
             </CardContent>
           </Card>
         )}
+        {/* 위치별 통계 */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              📍 위치별 손씻기 분석
+            </Typography>
+            <Stack spacing={2}>
+              {Object.entries(stats.locationStats)
+                .sort(([, a], [, b]) => (b as number) - (a as number))
+                .map(([location, count]) => {
+                  const percentage =
+                    stats.totalWashes > 0 ? ((count as number) / stats.totalWashes) * 100 : 0;
+                  const locationEmoji: Record<string, string> = {
+                    집: "🏠",
+                    회사: "🏢",
+                    식당: "🍽️",
+                    화장실: "🚻",
+                    기타: "🌍",
+                  };
 
+                  return (
+                    <Box key={location} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar sx={{ bgcolor: "#2196f3", width: 40, height: 40 }}>
+                        <Typography>{locationEmoji[location] || "📍"}</Typography>
+                      </Avatar>
+                      <Box flex={1}>
+                        <Typography variant="body1" fontWeight="bold">
+                          {location}
+                        </Typography>
+                        <LinearProgress variant="determinate" value={percentage} sx={{ mt: 0.5 }} />
+                      </Box>
+                      <Stack alignItems="flex-end">
+                        <Typography variant="h6" color="primary">
+                          {count as number}회
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          {percentage.toFixed(1)}%
+                        </Typography>
+                      </Stack>
+                    </Box>
+                  );
+                })}
+            </Stack>
+          </CardContent>
+        </Card>
         {/* 상세 기록 테이블 */}
         <Card>
           <CardContent>
@@ -626,7 +736,6 @@ export const 통계보기Component = () => {
             )}
           </CardContent>
         </Card>
-
         {기록추가Data.length === 0 && (
           <Alert severity="info" sx={{ textAlign: "center" }}>
             <Typography variant="h6" gutterBottom>
