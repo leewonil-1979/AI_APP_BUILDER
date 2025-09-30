@@ -1,0 +1,274 @@
+// JSONC spec for JIJI Clean
+// (ko) 모든 본문은 영어, 한국어는 주석으로만 표기. must_features는 snake_case, 마지막 쉼표 금지.
+{
+  "meta": {
+    "name": "JIJI Clean",
+    "slug": "jiji-clean",
+    "productName": "JIJI Clean",     // (ko) 스토어/OS 제품명
+    "displayName": "JIJI Clean",     // (ko) 홈화면/설정 표시명
+    "summary": "AR hygiene habit app for kids with depth-aware sticky icons",
+    "version": "1.0.0",
+    "category": "education",
+    "subCategory": "kids-habits",
+    "targetMarket": "b2c",
+    "launchDate": "TBD",
+    "competitorAnalysis": [
+      { "name": "SNOW", "url": "https://snow.me", "similarity": "medium", "userCount": "10M+", "revenue": "unknown" },
+      { "name": "YouCam Fun", "url": "https://www.perfectcorp.com", "similarity": "low", "userCount": "1M+", "revenue": "unknown" }
+    ]
+  },
+
+  "scope": {
+    "must_features": [
+      "ar_world_tracking",
+      "hand_anchor_detection",
+      "depth_aware_scaling"
+    ]
+  },
+
+  "users": {
+    "primaryUser": {
+      "demographic": "parents with kids",
+      "age": "5-10",
+      "location": "KR",
+      "income": "all",
+      "education": "all",
+      "techSavviness": "medium",
+      "deviceUsage": "ios"
+    },
+    "userPersona": {
+      "name": "Jisu (age 7)",
+      "background": "Elementary student, learns by visual feedback",
+      "goals": ["wash hands properly", "be motivated by effects"],
+      "painPoints": ["timers are boring", "no feedback"],
+      "motivations": ["cute rewards", "praise effects"],
+      "frustrations": ["effects not sticking to hands"]
+    },
+    "userJourney": [
+      { "phase": "awareness", "touchpoint": "app store", "action": "sees demo", "emotion": "curious", "opportunity": "show AR stickiness" },
+      { "phase": "interest", "touchpoint": "install", "action": "onboarding", "emotion": "hopeful", "opportunity": "explain rear camera AR" },
+      { "phase": "retention", "touchpoint": "daily wash", "action": "start AR camera", "emotion": "fun", "opportunity": "praise rewards" }
+    ]
+  },
+
+  "features": {
+    "core": [
+      {
+        "name": "ar_world_tracking",
+        "description": "Initialize AR session (ARCore/ARKit), world anchors, and depth-based scaling",
+        "priority": "must-have",
+        "complexity": "high",
+        "developmentWeeks": 3,
+        "dependencies": ["ar_runtime_init", "camera_stream"],
+        "acceptanceCriteria": [
+          "App starts AR session on rear camera",
+          "Placing an icon on a point keeps it stable as camera moves",
+          "Icon scales smaller when farther, larger when closer (±10% error)"
+        ]
+      },
+      {
+        "name": "hand_anchor_detection",
+        "description": "Detect hands (or target object) and resolve a 3D anchor to attach icons",
+        "priority": "must-have",
+        "complexity": "high",
+        "developmentWeeks": 3,
+        "dependencies": ["ar_world_tracking", "ml_runtime"],
+        "acceptanceCriteria": [
+          "Hands are detected at ≥24 FPS on mid-tier devices",
+          "Anchor updates keep icon aligned within 30px jitter in 1080p",
+          "Fallback to 2D overlay if AR session unsupported"
+        ]
+      },
+      {
+        "name": "depth_aware_scaling",
+        "description": "Use depth (ARCore/ARKit) or bbox-area heuristic to scale overlay",
+        "priority": "must-have",
+        "complexity": "medium",
+        "developmentWeeks": 1,
+        "dependencies": ["ar_world_tracking"],
+        "acceptanceCriteria": [
+          "Depth path active on AR-capable devices",
+          "Heuristic path active on non-AR devices",
+          "QA test: move hand 20→60cm, scale responds smoothly"
+        ]
+      },
+      {
+        "name": "camera_switching",
+        "description": "Default rear camera with manual toggle; maintain AR when rear",
+        "priority": "should-have",
+        "complexity": "low",
+        "developmentWeeks": 1,
+        "dependencies": ["ar_runtime_init"],
+        "acceptanceCriteria": [
+          "Rear camera default",
+          "Front camera disables AR world tracking with a clear notice"
+        ]
+      },
+      {
+        "name": "praise_effects",
+        "description": "Reward animations when washing flow completes",
+        "priority": "should-have",
+        "complexity": "low",
+        "developmentWeeks": 1,
+        "dependencies": ["hand_anchor_detection"]
+      }
+    ],
+    "advanced": [
+      {
+        "name": "occlusion_and_depth_mask",
+        "description": "Use human/hand depth mask to occlude icons realistically",
+        "phase": "beta",
+        "businessValue": "higher realism",
+        "technicalRisk": "medium"
+      },
+      {
+        "name": "plane_detection_rewards",
+        "description": "Place rewards on detected planes (sink area) after wash",
+        "phase": "v2",
+        "businessValue": "delight",
+        "technicalRisk": "low"
+      }
+    ]
+  },
+
+  "technical": {
+    "platform": {
+      "target": ["ios", "android"],
+      "primaryPlatform": "android",
+      "crossPlatform": "hybrid"
+    },
+    "architecture": {
+      "frontend": "flutter",
+      "backend": "serverless",
+      "database": "firestore",
+      "cloudProvider": "firebase",
+      "cdn": "none"
+    },
+    "identifiers": {
+      "android": { "applicationId": "com.jiji.clean", "packageName": "com.jiji.clean" },
+      "ios": { "bundleId": "com.jiji.clean", "teamId": "YOUR_APPLE_TEAM_ID" },
+      "deeplink": { "scheme": "jiji", "host": "clean.app" },
+      "analytics": { "eventPrefix": "jiji_", "userPropertyPrefix": "jiji_" },
+      "push": { "androidChannelId": "jiji_default" },
+      "firebase": {
+        "projectId": "jiji-clean",
+        "iosAppId": "REPLACE_WITH_IOS_APP_ID",
+        "androidAppId": "REPLACE_WITH_ANDROID_APP_ID"
+      }
+    },
+    "integrations": {
+      "authentication": "none",
+      "payments": "none",
+      "analytics": "firebase-analytics",
+      "pushNotifications": "none",
+      "crashReporting": "crashlytics",
+      "storage": "cloud-storage"
+      // (ko) 네이티브 종속성 참고:
+      // AR: ar_flutter_plugin (ARCore/ARKit)
+      // ML: google_mlkit_object_detection or MediaPipe Tasks
+    },
+    "performance": {
+      "expectedUsers": "1k-10k",
+      "peakConcurrency": "500",
+      "dataVolume": "low",
+      "responseTime": "<50ms per frame on native side",
+      "availability": "99%",
+      "scalingStrategy": "auto"
+    }
+  },
+
+  "ui-ux": {
+    "designSystem": {
+      "style": "playful",
+      "colorScheme": "brand-focused",
+      "typography": "system",
+      "iconStyle": "rounded"
+    },
+    "navigation": {
+      "type": "stack",
+      "structure": "hub-and-spoke",
+      "primaryNavItems": ["AR Camera", "Rewards"],
+      "secondaryNavItems": ["Settings"]
+    },
+    "keyScreens": [
+      {
+        "name": "AR Camera",
+        "type": "dashboard",
+        "priority": "high",
+        "wireframeNotes": "Rear camera + AR session, big capture button, status pill",
+        "keyComponents": ["CameraPreview", "AROverlay", "StatusPill", "ToggleFrontBack"],
+        "userActions": ["StartAR", "ToggleCamera", "Capture"]
+      }
+    ],
+    "accessibility": {
+      "compliance": "wcag-aa",
+      "features": ["voice-over", "large-text", "high-contrast"],
+      "testing": "manual"
+    }
+  },
+
+  "development": {
+    "methodology": "agile",
+    "timeline": {
+      "totalWeeks": 8,
+      "phases": [
+        { "name": "mvp", "weeks": 4, "deliverables": ["ar_world_tracking", "hand_anchor_detection", "depth_aware_scaling"], "dependencies": [] },
+        { "name": "beta", "weeks": 2, "deliverables": ["camera_switching", "praise_effects"], "dependencies": ["mvp"] },
+        { "name": "launch", "weeks": 2, "deliverables": ["stability", "store-listing"], "dependencies": ["beta"] }
+      ]
+    },
+    "team": {
+      "size": "small-2-5",
+      "roles": [
+        { "role": "mobile", "count": 2, "level": "mid", "commitment": "full-time" },
+        { "role": "qa", "count": 1, "level": "junior", "commitment": "part-time" }
+      ]
+    },
+    "budget": {
+      "category": "medium-50k",
+      "breakdown": [
+        { "category": "development", "amount": "70%", "notes": "Flutter + native plugins" },
+        { "category": "design", "amount": "10%", "notes": "assets & effects" },
+        { "category": "infrastructure", "amount": "10%", "notes": "Firebase" },
+        { "category": "misc", "amount": "10%", "notes": "devices for test" }
+      ]
+    }
+  },
+
+  "risks": [
+    { "category": "technical", "risk": "AR not supported or low performance on older devices", "probability": "medium", "impact": "high", "mitigation": "Detect capability at runtime; fallback to 2D overlay with ODT", "owner": "mobile", "timeline": "MVP" },
+    { "category": "legal", "risk": "Kids privacy compliance", "probability": "low", "impact": "high", "mitigation": "No PII; parental consent flows; local processing", "owner": "product", "timeline": "Beta" }
+  ],
+
+  "success": {
+    "definition": "Kids experience sticky, depth-aware icons while washing hands",
+    "kpis": [
+      { "metric": "ar_session_start_rate", "target": "90%", "timeframe": "MVP", "measurement": "analytics" },
+      { "metric": "anchor_stability_jitter_px", "target": "<=30", "timeframe": "MVP", "measurement": "QA test video" },
+      { "metric": "avg_fps", "target": ">=24", "timeframe": "MVP", "measurement": "device logs" }
+    ],
+    "milestones": [
+      { "milestone": "AR session runs on 10 devices", "timeline": "Week 3", "criteria": "≥24 FPS", "dependencies": [] }
+    ]
+  },
+
+  "reasoning": {
+    "keyDecisions": [
+      {
+        "decision": "Use ARCore/ARKit via Flutter",
+        "options": ["MLKit-only", "ARCore/ARKit + ML", "Pure 2D"],
+        "chosenOption": "ARCore/ARKit + ML",
+        "reasoning": "World anchors + depth are mandatory for stable sticking & scaling",
+        "tradeoffs": "Device support variance; higher integration complexity",
+        "alternatives": ["2D fallback"]
+      }
+    ],
+    "assumptions": [
+      { "assumption": "Target devices support ARCore/ARKit (60%+ of users)", "confidence": "medium", "validation": "Collect device capability metrics at first launch", "impact": "If lower, rely more on 2D fallback" }
+    ],
+    "nextSteps": [
+      { "action": "Integrate ar_flutter_plugin and run sample AR session (rear camera)", "owner": "mobile", "timeline": "Week 1", "priority": "high", "dependencies": [] },
+      { "action": "Wire ML hand/object detector and map to AR anchors", "owner": "mobile", "timeline": "Week 2", "priority": "high", "dependencies": ["AR session"] }
+    ]
+  }
+}
