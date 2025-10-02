@@ -1,0 +1,53 @@
+{
+  "name": "Flutter Basic Template",
+  "version": "1.0.0",
+  "description": "기본 Flutter 앱 템플릿",
+  "author": "AI_APP_BUILDER",
+  "features": {
+    "stateManagement": ["riverpod", "bloc", "provider"],
+    "navigation": ["goRouter", "navigator"],
+    "database": ["sqlite", "hive", "firestore"],
+    "ui": ["material", "cupertino"],
+    "architecture": "feature-based"
+  },
+  "structure": {
+    "lib/": {
+      "main.dart": "앱 진입점",
+      "app.dart": "앱 설정 및 라우팅",
+      "core/": {
+        "constants/": "상수 정의",
+        "theme/": "테마 설정",
+        "utils/": "유틸리티 함수",
+        "services/": "공통 서비스"
+      },
+      "features/": {
+        "home/": {
+          "data/": "데이터 레이어",
+          "domain/": "비즈니스 로직",
+          "presentation/": "UI 레이어"
+        },
+        "settings/": {
+          "data/": "데이터 레이어",
+          "domain/": "비즈니스 로직",
+          "presentation/": "UI 레이어"
+        }
+      },
+      "shared/": {
+        "widgets/": "공통 위젯",
+        "models/": "공통 모델",
+        "providers/": "상태 관리"
+      }
+    }
+  },
+  "dependencies": {
+    "flutter_riverpod": "^2.4.9",
+    "go_router": "^12.1.3",
+    "shared_preferences": "^2.2.2",
+    "http": "^1.1.2"
+  },
+  "dev_dependencies": {
+    "flutter_test": "sdk",
+    "flutter_lints": "^3.0.0",
+    "build_runner": "^2.4.7"
+  }
+}

@@ -1,0 +1,36 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'core/theme/app_theme.dart';
+import 'features/home/presentation/home_screen.dart';
+import 'features/settings/presentation/settings_screen.dart';
+
+class {{APP_CLASS_NAME}}App extends ConsumerWidget {
+  const {{APP_CLASS_NAME}}App({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
+      title: '{{APP_TITLE}}',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      routerConfig: _router,
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      name: 'home',
+      builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings', 
+      builder: (context, state) => const SettingsScreen(),
+    ),
+  ],
+);

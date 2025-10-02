@@ -1,0 +1,82 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "� Flutter Debug",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/${input:flutterApp}/lib/main.dart",
+      "cwd": "${workspaceFolder}/apps/${input:flutterApp}",
+      "toolArgs": ["--flavor", "dev"]
+    },
+    {
+      "name": "🏗️ Flutter Release",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/${input:flutterApp}/lib/main.dart",
+      "cwd": "${workspaceFolder}/apps/${input:flutterApp}",
+      "toolArgs": ["--release"]
+    },
+    {
+      "name": "🎯 Flutter Profile",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/${input:flutterApp}/lib/main.dart",
+      "cwd": "${workspaceFolder}/apps/${input:flutterApp}",
+      "toolArgs": ["--profile"]
+    },
+    {
+      "name": "🧪 Flutter Test",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/${input:flutterApp}/test/",
+      "cwd": "${workspaceFolder}/apps/${input:flutterApp}"
+    },
+    {
+      "name": "🐛 Debug Flutter Builder Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": ["${input:flutterBuilderScript}"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}\\.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+    },
+    {
+      "name": "🎨 Debug Flutter Agent",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}\\node_modules\\tsx\\dist\\cli.mjs",
+      "args": [
+        "${workspaceFolder}\\builder\\agents\\flutter_agent.ts",
+        "--appName",
+        "${input:flutterApp}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "flutterApp",
+      "description": "Select Flutter app",
+      "type": "pickString",
+      "options": ["jiji_clean", "my_app1"]
+    },
+    {
+      "id": "flutterBuilderScript",
+      "type": "pickString",
+      "description": "Select Flutter builder script to debug",
+      "options": [
+        "builder/scripts/new-flutter-app.ts",
+        "builder/scripts/flutter-codegen.ts",
+        "builder/scripts/flutter-validate.ts",
+        "builder/agents/flutter_agent.ts"
+      ]
+    }
+  ]
+}

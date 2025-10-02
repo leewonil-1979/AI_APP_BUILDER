@@ -1,0 +1,14 @@
+node_modules/
+dist/
+out/
+*.log
+.DS_Store
+
+# Template: apps 폴더는 비어있어야 함 (README만 포함)
+apps/*
+!apps/README.md
+
+# dotenv
+.env
+.env.*
+!*.example

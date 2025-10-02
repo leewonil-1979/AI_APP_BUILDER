@@ -1,0 +1,163 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
+import 'package:ar_flutter_plugin/datatypes/config_planedetection.dart';
+import 'package:ar_flutter_plugin/datatypes/node_types.dart';
+import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class ARScreen extends ConsumerStatefulWidget {
+  const ARScreen({super.key});
+
+  @override
+  ConsumerState<ARScreen> createState() => _ARScreenState();
+}
+
+class _ARScreenState extends ConsumerState<ARScreen> {
+  ARSessionManager? arSessionManager;
+  ARObjectManager? arObjectManager;
+  ARAnchorManager? arAnchorManager;
+  bool isARViewReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestCameraPermission();
+  }
+
+  @override
+  void dispose() {
+    arSessionManager?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (status != PermissionStatus.granted) {
+      // 권한이 거부된 경우 처리
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('카메라 권한이 필요합니다.')));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('AR {{APP_TITLE}}'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Stack(
+        children: [
+          // AR 뷰
+          ARView(
+            onARViewCreated: _onARViewCreated,
+            planeDetectionConfig: PlaneDetectionConfig.horizontal,
+          ),
+          // AR 컨트롤 UI
+          _buildARControls(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildARControls() {
+    return Positioned(
+      bottom: 50,
+      left: 20,
+      right: 20,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            heroTag: "add_object",
+            onPressed: _addObjectToAR,
+            child: const Icon(Icons.add_box),
+          ),
+          FloatingActionButton(
+            heroTag: "clear_objects",
+            onPressed: _clearARObjects,
+            child: const Icon(Icons.clear),
+          ),
+          FloatingActionButton(
+            heroTag: "take_screenshot",
+            onPressed: _takeScreenshot,
+            child: const Icon(Icons.camera),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onARViewCreated(
+    ARSessionManager arSessionManager,
+    ARObjectManager arObjectManager,
+    ARAnchorManager arAnchorManager,
+    ARLocationManager arLocationManager,
+  ) {
+    this.arSessionManager = arSessionManager;
+    this.arObjectManager = arObjectManager;
+    this.arAnchorManager = arAnchorManager;
+
+    this.arSessionManager!.onInitialize(
+      showFeaturePoints: false,
+      showPlanes: true,
+      customPlaneTexturePath: "assets/textures/triangle.png",
+      showWorldOrigin: true,
+      handleTaps: true,
+    );
+
+    this.arObjectManager!.onInitialize();
+
+    setState(() {
+      isARViewReady = true;
+    });
+  }
+
+  Future<void> _addObjectToAR() async {
+    if (!isARViewReady) return;
+
+    // 기본 정육면체 추가
+    var newNode = ARNode(
+      type: NodeType.webGLB,
+      uri: "assets/models/cube.glb", // 기본 3D 모델
+      scale: Vector3(0.2, 0.2, 0.2),
+      position: Vector3(0.0, 0.0, -0.5),
+      rotation: Vector4(1.0, 0.0, 0.0, 0.0),
+    );
+
+    bool? didAddNode = await arObjectManager?.addNode(newNode);
+    if (didAddNode == true) {
+      print("3D 객체가 AR 씬에 추가되었습니다.");
+    }
+  }
+
+  Future<void> _clearARObjects() async {
+    if (!isARViewReady) return;
+
+    await arObjectManager?.removeNode(null); // 모든 노드 제거
+    print("모든 AR 객체가 제거되었습니다.");
+  }
+
+  Future<void> _takeScreenshot() async {
+    if (!isARViewReady) return;
+
+    var image = await arSessionManager?.snapshot();
+    if (image != null) {
+      // 스크린샷 저장 로직
+      print("AR 스크린샷이 촬영되었습니다.");
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('AR 스크린샷이 저장되었습니다.')));
+      }
+    }
+  }
+}

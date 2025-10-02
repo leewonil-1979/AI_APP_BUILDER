@@ -1,0 +1,282 @@
+# Flutter AI_APP_BUILDER 설치 요구사항
+
+## 🚀 필수 설치 항목
+
+### 1. 개발 환경
+```bash
+# Node.js (18.0.0 이상)
+# https://nodejs.org/
+node --version
+
+# Git
+# https://git-scm.com/
+git --version
+
+# VS Code
+# https://code.visualstudio.com/
+```
+
+### 2. Flutter SDK
+```bash
+# Flutter SDK (3.16.0 이상, stable 채널)
+# https://docs.flutter.dev/get-started/install
+flutter doctor -v
+flutter channel stable
+flutter upgrade
+```
+
+### 3. 플랫폼별 도구
+
+#### Android 개발
+```bash
+# Android Studio
+# https://developer.android.com/studio
+
+# Android SDK
+# - API Level 21 (Android 5.0) - 최소
+# - API Level 34 (Android 14) - 타겟
+# - Build Tools 34.0.0
+# - Platform Tools
+# - Android Emulator
+
+# Java JDK 17
+# https://adoptium.net/
+java -version
+```
+
+#### iOS 개발 (macOS만)
+```bash
+# Xcode (15.0 이상)
+# App Store에서 설치
+
+# CocoaPods
+sudo gem install cocoapods
+pod --version
+
+# iOS Simulator (Xcode와 함께 설치)
+```
+
+### 4. VS Code 확장
+```bash
+# VS Code에서 설치할 확장들:
+# - Flutter
+# - Dart
+# - Flutter Widget Snippets
+# - Awesome Flutter Snippets
+# - Flutter Tree
+# - Error Lens
+# - Prettier
+# - ESLint
+# - TypeScript Importer
+```
+
+## 🎯 AR 개발 추가 요구사항
+
+### ARCore (Android)
+```bash
+# ARCore 지원 디바이스 필요
+# - Android 7.0 (API Level 24) 이상
+# - ARCore 지원 기기 목록: https://developers.google.com/ar/devices
+
+# Google Play Services for AR
+# 디바이스에서 자동 설치됨
+```
+
+### ARKit (iOS)
+```bash
+# ARKit 지원 디바이스 필요
+# - iOS 11.0 이상 (권장: iOS 12.0+)
+# - A9 프로세서 이상
+# - iPhone 6s 이상, iPad (2017) 이상
+```
+
+## 🤖 ML 개발 추가 요구사항
+
+### Google ML Kit
+```bash
+# 자동으로 Flutter 프로젝트에 포함됨
+# google_mlkit_* 패키지들
+```
+
+### TensorFlow Lite
+```bash
+# tflite_flutter 패키지 사용
+# 모델 파일 (.tflite) 필요시
+```
+
+## 📱 디바이스/에뮬레이터 설정
+
+### Android 에뮬레이터
+```bash
+# Android Studio > AVD Manager
+# 권장 설정:
+# - Pixel 7 (API 34)
+# - RAM: 4GB 이상
+# - Hardware Acceleration 활성화
+```
+
+### iOS 시뮬레이터
+```bash
+# Xcode > Window > Devices and Simulators
+# 권장 설정:
+# - iPhone 15 (iOS 17.0)
+# - iPad Air (5th generation)
+```
+
+### 실제 기기
+```bash
+# Android:
+# - 개발자 옵션 활성화
+# - USB 디버깅 허용
+# - 기기 드라이버 설치
+
+# iOS:
+# - Apple Developer 계정 필요
+# - Xcode에서 기기 등록
+# - Provisioning Profile 설정
+```
+
+## 🔧 프로젝트별 의존성
+
+### 기본 Flutter 앱
+```yaml
+# pubspec.yaml에 자동 추가됨:
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.4.9
+  go_router: ^12.1.3
+  shared_preferences: ^2.2.2
+  http: ^1.1.2
+```
+
+### AR 앱 추가 의존성
+```yaml
+dependencies:
+  ar_flutter_plugin: ^0.7.3
+  vector_math: ^2.1.4
+  camera: ^0.11.0+2
+  permission_handler: ^11.1.0
+```
+
+### ML 앱 추가 의존성
+```yaml
+dependencies:
+  google_mlkit_pose_detection: ^0.12.0
+  google_mlkit_face_detection: ^0.10.1
+  tflite_flutter: ^0.10.4
+  image: ^4.1.3
+```
+
+## 🚨 트러블슈팅 체크리스트
+
+### Flutter Doctor 오류 해결
+```bash
+# 1. Flutter doctor 실행
+flutter doctor -v
+
+# 2. 일반적인 문제들:
+# ❌ Android Studio not found
+#   → Android Studio 설치 후 flutter config --android-studio-dir <path>
+
+# ❌ Android SDK not found
+#   → Android Studio > SDK Manager에서 설치
+
+# ❌ Xcode not installed (macOS)
+#   → App Store에서 Xcode 설치
+
+# ❌ CocoaPods not installed (macOS)
+#   → sudo gem install cocoapods
+
+# ❌ Chrome not found
+#   → Chrome 브라우저 설치 (웹 개발용)
+```
+
+### 권한 설정 확인
+```bash
+# Android Manifest 권한:
+# - CAMERA (AR/카메라 앱)
+# - ACCESS_FINE_LOCATION (위치 기반 앱)
+# - WRITE_EXTERNAL_STORAGE (파일 저장)
+
+# iOS Info.plist 권한:
+# - NSCameraUsageDescription
+# - NSLocationWhenInUseUsageDescription
+# - NSPhotoLibraryUsageDescription
+```
+
+## 📦 빌드 도구 확인
+
+### Android 빌드
+```bash
+# Gradle 래퍼 사용 (자동)
+./gradlew --version
+
+# 키스토어 생성 (릴리즈 빌드용)
+keytool -genkey -v -keystore ~/release-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias release
+```
+
+### iOS 빌드
+```bash
+# Xcode Command Line Tools
+xcode-select --install
+
+# 서명 인증서 확인 (Keychain Access)
+# Provisioning Profile 확인 (Xcode > Preferences > Accounts)
+```
+
+## 🔄 정기 업데이트
+
+### Flutter SDK
+```bash
+# 정기적으로 업데이트
+flutter upgrade
+flutter doctor -v
+```
+
+### 의존성 패키지
+```bash
+# 프로젝트별로 업데이트
+flutter pub upgrade
+flutter pub outdated
+```
+
+### VS Code 확장
+```bash
+# VS Code > Extensions > 업데이트 확인
+# 자동 업데이트 권장
+```
+
+## 🎯 성능 최적화 도구
+
+### 분석 도구
+```bash
+# Flutter Inspector (VS Code 확장)
+# Flutter Performance (DevTools)
+# Memory 사용량 모니터링
+# Network 요청 분석
+```
+
+### 프로파일링
+```bash
+# CPU 프로파일링
+flutter run --profile
+
+# 메모리 리크 검사
+flutter run --enable-memory-diagnostics
+```
+
+---
+
+## 📝 설치 완료 체크리스트
+
+- [ ] Flutter SDK 설치 및 환경변수 설정
+- [ ] Android Studio 및 Android SDK 설치
+- [ ] VS Code 및 Flutter 확장 설치
+- [ ] 에뮬레이터 또는 실제 기기 연결
+- [ ] `flutter doctor -v` 모든 항목 ✓
+- [ ] `npm install` AI_APP_BUILDER 의존성 설치
+- [ ] Git 설정 및 저장소 클론
+- [ ] 첫 번째 테스트 앱 생성 및 실행
+
+**🎉 모든 항목이 완료되면 Flutter 개발 준비 완료!**

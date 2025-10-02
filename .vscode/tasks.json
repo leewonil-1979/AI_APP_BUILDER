@@ -1,0 +1,168 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "� Flutter: Create New App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "flutter:new", "${input:newFlutterAppName}"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "새로운 Flutter 앱 생성",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "🎯 Flutter: Create AR App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "flutter:new", "--", "--ar", "${input:newFlutterAppName}"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "새로운 Flutter AR 앱 생성",
+      "group": "build"
+    },
+    {
+      "label": "📱 Flutter: Run Debug",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["run", "--debug"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 앱 디버그 모드로 실행",
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "🏗️ Flutter: Build APK",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "apk", "--release"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 앱 APK 빌드",
+      "group": "build"
+    },
+    {
+      "label": "� Flutter: Build iOS",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "ios", "--release"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 앱 iOS 빌드",
+      "group": "build"
+    },
+    {
+      "label": "📦 Flutter: Install Dependencies",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 의존성 설치",
+      "group": "build"
+    },
+    {
+      "label": "🧹 Flutter: Clean",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 프로젝트 정리",
+      "group": "build"
+    },
+    {
+      "label": "🧪 Flutter: Run Tests",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 테스트 실행",
+      "group": "test"
+    },
+    {
+      "label": "🔍 Flutter: Analyze Code",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["analyze"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 코드 분석",
+      "group": "test"
+    },
+    {
+      "label": "🩺 Flutter: Doctor",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["doctor", "-v"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter 환경 진단",
+      "group": "test"
+    },
+    {
+      "label": "� Flutter: Hot Reload",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["run", "--hot-reload"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter Hot Reload 실행",
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "⚡ Flutter: Hot Restart",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["run", "--hot-restart"],
+      "options": {
+        "cwd": "${workspaceFolder}\\apps\\${input:flutterAppName}"
+      },
+      "problemMatcher": [],
+      "detail": "Flutter Hot Restart 실행",
+      "group": "build"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "flutterAppName",
+      "type": "pickString",
+      "description": "작업할 Flutter 앱 선택",
+      "options": ["jiji_clean", "my_app1"],
+      "default": "jiji_clean"
+    },
+    {
+      "id": "newFlutterAppName",
+      "type": "promptString",
+      "description": "새 Flutter 앱 이름을 입력하세요 (예: my_flutter_app)"
+    }
+  ]
+}
