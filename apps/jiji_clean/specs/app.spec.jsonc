@@ -1,0 +1,152 @@
+// JIJI Clean — 초간단 버전: 세균/반짝 아이콘 선택 → 카메라 → 촬영
+// 핵심만: Camera + ML Kit Pose (손목 위치) + 2D 오버레이
+
+{
+  "meta": {
+    "name": "JIJI Clean",
+    "slug": "jiji-clean",
+    "productName": "JIJI Clean",
+    "displayName": "JIJI Clean",
+    "summary": "Simple hand-washing motivation app with germ/sparkle icons",
+    "version": "1.0.0",
+    "category": "education",
+    "subCategory": "kids-habits"
+  },
+
+  "features": {
+    "core": [
+      {
+        "name": "camera_preview",
+        "description": "Rear/front camera preview with zoom (0.5x-2.0x) and gallery access",
+        "priority": "must-have",
+        "complexity": "low",
+        "developmentWeeks": 1,
+        "dependencies": [],
+        "acceptanceCriteria": [
+          "1080p@30fps stable stream",
+          "Camera switch button (rear/front)",
+          "Zoom slider 0.5x-2.0x on right side",
+          "Gallery thumbnail on bottom-left",
+          "Shutter button center-bottom"
+        ]
+      },
+      {
+        "name": "hand_wrist_detection",
+        "description": "ML Kit Pose Detection to find wrist position (rough location only)",
+        "priority": "must-have",
+        "complexity": "medium",
+        "developmentWeeks": 1,
+        "dependencies": ["camera_preview"],
+        "acceptanceCriteria": [
+          "Detect left/right wrist position",
+          "≥15 FPS detection rate",
+          "No complex tracking, just current frame position"
+        ]
+      },
+      {
+        "name": "icon_overlay",
+        "description": "Display selected icon at wrist position as simple 2D overlay",
+        "priority": "must-have",
+        "complexity": "low",
+        "developmentWeeks": 1,
+        "dependencies": ["hand_wrist_detection"],
+        "acceptanceCriteria": [
+          "Icon appears at detected wrist",
+          "Fixed size (no scaling)",
+          "Low jitter with simple smoothing"
+        ]
+      },
+      {
+        "name": "icon_selection",
+        "description": "Two rows of icons: 4 germ icons (top row) + 4 sparkle icons (bottom row)",
+        "priority": "must-have",
+        "complexity": "low",
+        "developmentWeeks": 0.5,
+        "dependencies": [],
+        "acceptanceCriteria": [
+          "8 icons total (4 germs, 4 sparkles)",
+          "Tap to select, visual highlight",
+          "Selected icon used for overlay"
+        ]
+      },
+      {
+        "name": "photo_capture",
+        "description": "Capture photo with overlay and save to gallery",
+        "priority": "must-have",
+        "complexity": "low",
+        "developmentWeeks": 0.5,
+        "dependencies": ["icon_overlay"],
+        "acceptanceCriteria": [
+          "Shutter button captures current frame with overlay",
+          "Auto-save to device gallery",
+          "Show thumbnail after capture"
+        ]
+      }
+    ]
+  },
+
+  "technical": {
+    "platform": {
+      "target": ["android", "ios"],
+      "primaryPlatform": "android"
+    },
+    "architecture": {
+      "frontend": "flutter",
+      "backend": "none",
+      "database": "none"
+    },
+    "identifiers": {
+      "android": {
+        "applicationId": "com.jiji.clean",
+        "packageName": "com.jiji.clean"
+      },
+      "ios": {
+        "bundleId": "com.jiji.clean"
+      }
+    },
+    "dependencies": {
+      "camera": "^0.11.0",
+      "google_mlkit_pose_detection": "^0.14.0",
+      "image_picker": "^1.0.0",
+      "path_provider": "^2.1.0",
+      "permission_handler": "^11.0.0"
+    }
+  },
+
+  "ui": {
+    "screens": [
+      {
+        "name": "Camera Screen",
+        "layout": "fullscreen-camera",
+        "components": [
+          "Top: 2 rows of icons (4+4)",
+          "Center: Camera preview with wrist overlay",
+          "Bottom-left: Gallery thumbnail",
+          "Bottom-center: Shutter button",
+          "Bottom-right: Camera switch",
+          "Right-side: Zoom slider (0.5x-2.0x)"
+        ]
+      }
+    ],
+    "icons": {
+      "germs": ["🦠", "🧫", "🦟", "🐛"],
+      "sparkles": ["✨", "💎", "⭐", "🌟"]
+    }
+  },
+
+  "development": {
+    "timeline": {
+      "totalWeeks": 2,
+      "phases": [
+        {
+          "name": "week1",
+          "deliverables": ["camera_preview", "hand_wrist_detection", "icon_selection"]
+        },
+        {
+          "name": "week2",
+          "deliverables": ["icon_overlay", "photo_capture", "polish"]
+        }
+      ]
+    }
+  }
+}
