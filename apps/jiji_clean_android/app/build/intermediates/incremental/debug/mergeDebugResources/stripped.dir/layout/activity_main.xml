@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".MainActivity">
+
+    <!-- 카메라 프리뷰 -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 손 추적 오버레이 (커스텀 뷰) -->
+    <com.jiji.jijiclean.OverlayView
+        android:id="@+id/overlayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 상단: 아이콘 선택 영역 -->
+    <LinearLayout
+        android:id="@+id/iconContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:background="@drawable/gradient_top"
+        android:padding="16dp">
+
+        <!-- 세균 아이콘 줄 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/icon1"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="🦠"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="🧫"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon3"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="🦟"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon4"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="🐛"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- 반짝 아이콘 줄 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/icon5"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="✨"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon6"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="💎"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon7"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="⭐"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/icon8"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="🌟"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:background="@drawable/icon_background"
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 하단: 컨트롤 버튼들 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/gradient_bottom"
+        android:padding="24dp">
+
+        <!-- 갤러리 버튼 -->
+        <ImageButton
+            android:id="@+id/galleryButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_background"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:contentDescription="Gallery"
+            android:layout_marginEnd="32dp" />
+
+        <!-- 셔터 버튼 -->
+        <ImageButton
+            android:id="@+id/captureButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/shutter_button"
+            android:contentDescription="Capture" />
+
+        <!-- 카메라 전환 버튼 -->
+        <ImageButton
+            android:id="@+id/flipButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_background"
+            android:src="@android:drawable/ic_menu_camera"
+            android:contentDescription="Flip Camera"
+            android:layout_marginStart="32dp" />
+    </LinearLayout>
+
+    <!-- 우측: 줌 슬라이더 -->
+    <LinearLayout
+        android:layout_width="50dp"
+        android:layout_height="300dp"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/button_background"
+        android:padding="8dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2.0×"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
+
+        <SeekBar
+            android:id="@+id/zoomSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:rotation="270"
+            android:max="30"
+            android:progress="10" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.5×"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+</FrameLayout>

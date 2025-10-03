@@ -1,0 +1,35 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color white
+drawable button_background
+drawable gradient_bottom
+drawable gradient_top
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+drawable icon_background
+drawable shutter_button
+id captureButton
+id flipButton
+id galleryButton
+id icon1
+id icon2
+id icon3
+id icon4
+id icon5
+id icon6
+id icon7
+id icon8
+id iconContainer
+id main
+id overlayView
+id previewView
+id zoomSeekBar
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Base.Theme.JIJIClean
+style Theme.JIJIClean
+xml backup_rules
+xml data_extraction_rules

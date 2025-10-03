@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.jiji.jijiclean.app-mergeDebugResources-3:/layout/activity_main.xml",
+        "source": "com.jiji.jijiclean.app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\won20\\.gradle\\daemon\\8.13\\com.jiji.jijiclean.app-mergeDebugResources-3:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\won20\\.gradle\\daemon\\8.13\\com.jiji.jijiclean.app-main-6:\\layout\\activity_main.xml"
+    }
+]
